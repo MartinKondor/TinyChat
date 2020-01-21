@@ -1,23 +1,12 @@
 import socket
 import RPi.GPIO as GPIO
 from threading import Thread
-
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
     
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-MY_PRE = bcolors.BOLD + '>> '
+MY_PRE = '>> '
 OTHER_PRE = 'A:'
 OTHER_IP = '192.168.20.10'
 IS_SERVER = True
@@ -80,20 +69,19 @@ def eth_eval(text):
         if cmd[0] == 'h':
             GPIO.output(int(cmd[1:]), GPIO.HIGH)
             
-            
-def send_msg():
-    while True:
-        ETH.send(eth_encode(input(MY_PRE)))
-
-        
-def get_msg():
-    while True:
-        data = eth_decode(ETH.recv(1024))
-        if data:
-            print(OTHER_PRE, data)
-            
 
 if __name__ == '__main__':
+    def send_msg():
+        while True:
+            ETH.send(eth_encode(input(MY_PRE)))
+
+            
+    def get_msg():
+        while True:
+            data = eth_decode(ETH.recv(1024))
+            if data:
+                print(OTHER_PRE, data)
+
     ETH = eth_setup(IS_SERVER)
     
     try:
