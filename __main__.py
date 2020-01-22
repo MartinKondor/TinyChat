@@ -1,10 +1,13 @@
+# 1.2
 import os
+import time
 import json
 import socket
 from tkinter import Tk, Menu, Listbox, Label, Scrollbar, Entry, StringVar, SINGLE, END, CENTER, ACTIVE, LEFT, N, S, E, W
 from tkinter.ttk import Button, Style
 from tkinter.messagebox import showinfo, showerror, askquestion
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+from RPi import GPIO
 
 from eth import *
 
@@ -48,7 +51,7 @@ class SetupWindow(Tk):
 
         self.name_entry = Entry(self, textvariable=StringVar(), bd=1, width=30, bg='white', fg='black')
         self.other_ip_entry = Entry(self, textvariable=StringVar(), bd=1, width=30, bg='white', fg='black')
-        self.server_button = Button(self, text='Yes', width=22, command=lambda: self.set_is_server())
+        self.server_button = Button(self, text='Yes' if self.is_server else 'No', width=22, command=lambda: self.set_is_server())
         self.apply_button = Button(self, text='Start', width=7, command=self.apply)
 
         self.name_entry.config(textvariable=StringVar(self, self.name))
@@ -121,10 +124,13 @@ class TinyChat(Tk):
         self.ETH = eth_setup(IS_SERVER)
         self.msg_recv_thread = Thread(target=self.recv_msg)
         self.msg_recv_thread.start()
+        
+        self.notifications_thread = Thread(target=self.notifications)
+        self.notifications_thread.start()
 
-        self.bind("<FocusIn>", self.handle_focus)
+        self.wm_attributes('-topmost', 1)
+        self.bind('<FocusIn>', self.handle_focus)
         self.protocol('WM_DELETE_WINDOW', self.on_closing)
-        self.after(500, self.notifications)
         self.mainloop()
 
     def send_msg(self):
@@ -144,7 +150,16 @@ class TinyChat(Tk):
             msg_to_send = MY_NAME + ': ' + msg_to_send
             self.msg_list.insert(END, msg_to_send)
             self.msg_list.yview_moveto('1')  # Scroll down to the last message
-            self.ETH.send(eth_encode(msg_to_send))
+            
+            try:
+                self.ETH.send(eth_encode(msg_to_send))
+            except:
+                self.msg_list.insert(END, 'There is noone on the other end  ¯\_(ツ)_/¯.')
+                
+                # Try to reestabilish connection
+                self.ETH = eth_setup(IS_SERVER)
+                self.msg_recv_thread = Thread(target=self.recv_msg)
+                self.msg_recv_thread.start()
 
     def recv_msg(self):
         while True:
@@ -154,15 +169,30 @@ class TinyChat(Tk):
                 self.msg_list.yview_moveto('1')  # Scroll down to the last message
                 self.new_notification = True
 
-    def handle_focus(self):
+    def handle_focus(self, e):
         self.new_notification = False
 
     def notifications(self):
         if self.new_notification:
+            GPIO.output(21, GPIO.HIGH)
+            time.sleep(0.25)
+            GPIO.output(21, GPIO.LOW)
+            time.sleep(0.25)
+            
             self.focus_force()
 
     def on_closing(self):
-        self.ETH.close()
+        try:
+            self.ETH.send(eth_encode(MY_NAME + ' has left the chat.'))
+        except:
+            pass
+            
+        try:
+            self.ETH.close()
+        except:
+            pass
+
+        self.destroy()
 
     def keypress(self, event):
         # print(repr(event.char))
@@ -176,5 +206,10 @@ class TinyChat(Tk):
 
 
 if __name__ == '__main__':
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    GPIO.setup(21, GPIO.OUT)
+    GPIO.output(21, GPIO.HIGH)
+
     SetupWindow()
     TinyChat()

@@ -2,7 +2,7 @@ import socket
 from threading import Thread
     
 
-OTHER_IP = '192.168.20.10'
+OTHER_IP = '192.168.1.21'
 IS_SERVER = True
 SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ETH = None
