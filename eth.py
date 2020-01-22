@@ -1,13 +1,7 @@
 import socket
-import RPi.GPIO as GPIO
 from threading import Thread
     
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-MY_PRE = '>> '
-OTHER_PRE = 'A:'
 OTHER_IP = '192.168.20.10'
 IS_SERVER = True
 SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,8 +26,8 @@ def eth_setup(is_server):
 
 def eth_decode(s):
     """
-    Startjel: ~
-    Végejel: ;
+    Startsign: ~
+    Endsign: ;
     """
     new_s = ''
     ns = s.decode('utf-8')
@@ -56,31 +50,19 @@ def eth_decode(s):
 
 def eth_encode(s):
     return bytearray(('~' + str(s) + (';' if s[-1] != ';' else '')).encode('utf-8'))
-
-
-def eth_eval(text):
-    cmds = [t for t in text.split(',') if t]
-    
-    for cmd in cmds:
-        if cmd[0] == 'o':
-            GPIO.setup(int(cmd[1:]), GPIO.OUT)
-        if cmd[0] == 'l':
-            GPIO.output(int(cmd[1:]), GPIO.LOW)
-        if cmd[0] == 'h':
-            GPIO.output(int(cmd[1:]), GPIO.HIGH)
             
 
 if __name__ == '__main__':
     def send_msg():
         while True:
-            ETH.send(eth_encode(input(MY_PRE)))
+            ETH.send(eth_encode(input('>> ')))
 
             
     def get_msg():
         while True:
             data = eth_decode(ETH.recv(1024))
             if data:
-                print(OTHER_PRE, data)
+                print(data)
 
     ETH = eth_setup(IS_SERVER)
     

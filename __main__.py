@@ -1,19 +1,22 @@
+import os
+import json
 import socket
 from tkinter import Tk, Menu, Listbox, Label, Scrollbar, Entry, StringVar, SINGLE, END, CENTER, ACTIVE, LEFT, N, S, E, W
 from tkinter.ttk import Button, Style
 from tkinter.messagebox import showinfo, showerror, askquestion
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
-try:
-    from eth import *
-except:
-    pass
+from eth import *
 
 
 MY_NAME = 'anonymous'
 
 
 class SetupWindow(Tk):
+    """
+    Little GUI for setting user's name, the partner's ip and that
+    the RPi is a server or not.
+    """
 
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -30,6 +33,14 @@ class SetupWindow(Tk):
         self.name = 'anonymous'
         self.other_ip = socket.gethostbyname(socket.gethostname() )
         self.is_server = True
+
+        # Read last config from file
+        if os.path.isfile('config.json'):
+            with open('config.json', 'r') as file:
+                config = json.load(file)
+                self.name = config['name']
+                self.other_ip = config['other_ip']
+                self.is_server = config['is_server']
 
         self.name_label = Label(self, text='Name')
         self.other_ip_label = Label(self, text='IP')
@@ -64,10 +75,19 @@ class SetupWindow(Tk):
             MY_NAME = self.name_entry.get()
             OTHER_IP = self.other_ip_entry.get()
             IS_SERVER = self.server_button.cget('text') == 'Yes'
+
+            config = {
+                'name': MY_NAME,
+                'other_ip': OTHER_IP,
+                'is_server': IS_SERVER
+            }
+            with open('config.json', 'w+') as file:
+                json.dump(config, file)
+
             self.destroy()
 
 
-class TalkGUI(Tk):
+class TinyChat(Tk):
 
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -77,10 +97,12 @@ class TalkGUI(Tk):
         except Exception:
             pass
 
-        self.wm_title('TalkGUI')
+        self.wm_title('TinyChat')
         self.resizable(False, False)
         self.eval('tk::PlaceWindow %s center' % self.winfo_pathname(self.winfo_id()))
         self.bind('<Key>', self.keypress)
+
+        self.new_notification = False
 
         self.msg_list = Listbox(self, selectmode=SINGLE, height=10, width=50, borderwidth=0)
         self.msg_scb = Scrollbar(self, orient='vertical')
@@ -97,11 +119,16 @@ class TalkGUI(Tk):
         
         # Connect on the ethernet port
         self.ETH = eth_setup(IS_SERVER)
-        Thread(target=self.recv_msg).start()
-        
+        self.msg_recv_thread = Thread(target=self.recv_msg)
+        self.msg_recv_thread.start()
+
+        self.bind("<FocusIn>", self.handle_focus)
+        self.protocol('WM_DELETE_WINDOW', self.on_closing)
+        self.after(500, self.notifications)
         self.mainloop()
 
     def send_msg(self):
+        global MY_NAME
         msg_to_send = self.entry_box.get()
         self.entry_box.delete(0, END)
         
@@ -125,6 +152,17 @@ class TalkGUI(Tk):
             if data:
                 self.msg_list.insert(END, data)
                 self.msg_list.yview_moveto('1')  # Scroll down to the last message
+                self.new_notification = True
+
+    def handle_focus(self):
+        self.new_notification = False
+
+    def notifications(self):
+        if self.new_notification:
+            self.focus_force()
+
+    def on_closing(self):
+        self.ETH.close()
 
     def keypress(self, event):
         # print(repr(event.char))
@@ -139,4 +177,4 @@ class TalkGUI(Tk):
 
 if __name__ == '__main__':
     SetupWindow()
-    TalkGUI()
+    TinyChat()
