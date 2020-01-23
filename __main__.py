@@ -3,16 +3,19 @@ import os
 import time
 import json
 import socket
+from threading import Thread
 from tkinter import Tk, Menu, Listbox, Label, Scrollbar, Entry, StringVar, SINGLE, END, CENTER, ACTIVE, LEFT, N, S, E, W
 from tkinter.ttk import Button, Style
 from tkinter.messagebox import showinfo, showerror, askquestion
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from RPi import GPIO
 
-from eth import *
+from eth import ETHConnection
 
 
 MY_NAME = 'anonymous'
+OTHER_IP = ''
+IS_SERVER = False
 
 
 class SetupWindow(Tk):
@@ -34,7 +37,7 @@ class SetupWindow(Tk):
         self.eval('tk::PlaceWindow %s center' % self.winfo_pathname(self.winfo_id()))
 
         self.name = 'anonymous'
-        self.other_ip = socket.gethostbyname(socket.gethostname() )
+        self.other_ip = socket.gethostbyname(socket.gethostname())
         self.is_server = True
 
         # Read last config from file
@@ -121,10 +124,10 @@ class TinyChat(Tk):
         self.entry_button.grid(padx=0, pady=0, row=1, column=1)
         
         # Connect on the ethernet port
-        self.ETH = eth_setup(IS_SERVER)
+        self.ETH = ETHConnection(OTHER_IP, IS_SERVER)
         self.msg_recv_thread = Thread(target=self.recv_msg)
         self.msg_recv_thread.start()
-        
+
         self.notifications_thread = Thread(target=self.notifications)
         self.notifications_thread.start()
 
@@ -134,7 +137,7 @@ class TinyChat(Tk):
         self.mainloop()
 
     def send_msg(self):
-        global MY_NAME
+        global MY_NAME, OTHER_IP
         msg_to_send = self.entry_box.get()
         self.entry_box.delete(0, END)
         
@@ -142,8 +145,19 @@ class TinyChat(Tk):
             if msg_to_send[0] == '/':  # Commands
                 cmd = msg_to_send.split(' ')
                 
+                if cmd[0] == '/?':
+                    self.msg_list.insert(END, ' ')
+                    self.msg_list.insert(END, 'HELP:')
+                    self.msg_list.insert(END, '/setname NAME - Sets your name for the given NAME.')
+                    self.msg_list.insert(END, '/re - Tries to reconnect.')
+                    self.msg_list.insert(END, '/ip IP - Sets the partner\'s ip to IP.')
+                    self.msg_list.insert(END, ' ')
                 if cmd[0] == '/setname':
                     MY_NAME = cmd[1].strip()
+                if cmd[0] == '/re':
+                    self.ETH.reconnect()
+                if cmd[0] == '/ip':
+                    OTHER_IP = cmd[1].strip()
                     
                 return
         
@@ -152,18 +166,18 @@ class TinyChat(Tk):
             self.msg_list.yview_moveto('1')  # Scroll down to the last message
             
             try:
-                self.ETH.send(eth_encode(msg_to_send))
+                self.ETH.send(msg_to_send)
             except:
                 self.msg_list.insert(END, 'There is noone on the other end  ¯\_(ツ)_/¯.')
                 
                 # Try to reestabilish connection
-                self.ETH = eth_setup(IS_SERVER)
+                self.ETH.reconnect()
                 self.msg_recv_thread = Thread(target=self.recv_msg)
                 self.msg_recv_thread.start()
 
     def recv_msg(self):
         while True:
-            data = eth_decode(self.ETH.recv(1024))
+            data = self.ETH.recv(1024)
             if data:
                 self.msg_list.insert(END, data)
                 self.msg_list.yview_moveto('1')  # Scroll down to the last message
@@ -182,16 +196,8 @@ class TinyChat(Tk):
             self.focus_force()
 
     def on_closing(self):
-        try:
-            self.ETH.send(eth_encode(MY_NAME + ' has left the chat.'))
-        except:
-            pass
-            
-        try:
-            self.ETH.close()
-        except:
-            pass
-
+        self.ETH.send(MY_NAME + ' has left the chat.')
+        self.ETH.close()
         self.destroy()
 
     def keypress(self, event):
