@@ -73,6 +73,7 @@ class SetupWindow(Tk):
     def set_is_server(self):
         self.is_server = not self.is_server
         self.server_button.config(text='Yes' if self.is_server else 'No')
+        self.other_ip_entry.config(state='disabled' if self.is_server else 'enabled')
 
     def apply(self):
         global MY_NAME, OTHER_IP, IS_SERVER
@@ -109,14 +110,15 @@ class TinyChat(Tk):
         self.bind('<Key>', self.keypress)
 
         self.new_notification = False
+        self.line_width = 42
 
-        self.msg_list = Listbox(self, selectmode=SINGLE, height=10, width=50, borderwidth=0)
+        self.msg_list = Listbox(self, selectmode=SINGLE, height=10, width=self.line_width, borderwidth=0)
         self.msg_scb = Scrollbar(self, orient='vertical')
         self.msg_scb.grid(padx=0, pady=0, row=0, column=1, sticky=N + S)
         self.msg_list.config(yscrollcommand=self.msg_scb.set)
         self.msg_scb.config(command=self.msg_list.yview)
         
-        self.entry_box = Entry(self, textvariable=StringVar(), bd=0, width=50, bg='white', fg='black')
+        self.entry_box = Entry(self, textvariable=StringVar(), bd=0, width=self.line_width, bg='white', fg='black')
         self.entry_button = Button(self, text='→', width=3, command=self.send_msg)
         
         self.msg_list.grid(padx=0, pady=0, row=0, column=0)
@@ -162,8 +164,7 @@ class TinyChat(Tk):
                 return
         
             msg_to_send = MY_NAME + ': ' + msg_to_send
-            self.msg_list.insert(END, msg_to_send)
-            self.msg_list.yview_moveto('1')  # Scroll down to the last message
+            self.add_msg(msg_to_send)
             
             try:
                 self.ETH.send(msg_to_send)
@@ -175,12 +176,20 @@ class TinyChat(Tk):
                 self.msg_recv_thread = Thread(target=self.recv_msg)
                 self.msg_recv_thread.start()
 
+    def add_msg(self, msg):
+        if len(msg) > self.line_width:
+            for i in range(int(len(msg) / self.line_width)):
+                self.msg_list.insert(END, msg[i * self.line_width:(i + 1) * self.line_width])
+        else:
+            self.msg_list.insert(END, msg)
+        
+        self.msg_list.yview_moveto('1')  # Scroll down to the last message
+
     def recv_msg(self):
         while True:
             data = self.ETH.recv(1024)
             if data:
-                self.msg_list.insert(END, data)
-                self.msg_list.yview_moveto('1')  # Scroll down to the last message
+                self.add_msg(data)
                 self.new_notification = True
 
     def handle_focus(self, e):
@@ -192,8 +201,6 @@ class TinyChat(Tk):
             time.sleep(0.25)
             GPIO.output(21, GPIO.LOW)
             time.sleep(0.25)
-            
-            self.focus_force()
 
     def on_closing(self):
         self.ETH.send(MY_NAME + ' has left the chat.')
