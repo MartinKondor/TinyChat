@@ -1,4 +1,4 @@
-# TinyChat 💬
+# 💬 TinyChat
 
 [![version](https://img.shields.io/badge/version-v0.1.0-red.svg)](https://github.com/MartinKondor/TinyChat) [![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/MartinKondor/TinyChat) ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg) [![GitHub Issues](https://img.shields.io/github/issues/MartinKondor/TinyChat.svg)](https://github.com/MartinKondor/TinyChat/issues)
 
