@@ -13,7 +13,7 @@ from RPi import GPIO
 from eth import ETHConnection
 
 
-MY_NAME = 'anonymous'
+MY_NAME = ''
 OTHER_IP = ''
 IS_SERVER = False
 
@@ -59,6 +59,7 @@ class SetupWindow(Tk):
 
         self.name_entry.config(textvariable=StringVar(self, self.name))
         self.other_ip_entry.config(textvariable=StringVar(self, self.other_ip))
+        self.other_ip_entry.config(state='disabled' if self.is_server else 'normal')
 
         self.name_label.grid(padx=1, pady=2, row=0, column=0)
         self.name_entry.grid(padx=1, pady=2, row=0, column=1)
@@ -73,7 +74,7 @@ class SetupWindow(Tk):
     def set_is_server(self):
         self.is_server = not self.is_server
         self.server_button.config(text='Yes' if self.is_server else 'No')
-        self.other_ip_entry.config(state='disabled' if self.is_server else 'enabled')
+        self.other_ip_entry.config(state='disabled' if self.is_server else 'normal')
 
     def apply(self):
         global MY_NAME, OTHER_IP, IS_SERVER
@@ -178,7 +179,7 @@ class TinyChat(Tk):
 
     def add_msg(self, msg):
         if len(msg) > self.line_width:
-            for i in range(int(len(msg) / self.line_width)):
+            for i in range(int(len(msg) / self.line_width) + 1):
                 self.msg_list.insert(END, msg[i * self.line_width:(i + 1) * self.line_width])
         else:
             self.msg_list.insert(END, msg)
@@ -225,4 +226,5 @@ if __name__ == '__main__':
     GPIO.output(21, GPIO.HIGH)
 
     SetupWindow()
-    TinyChat()
+    if MY_NAME:
+        TinyChat()
