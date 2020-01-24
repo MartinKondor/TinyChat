@@ -1,8 +1,8 @@
 [Desktop Entry]
-Encoding=UTF-8
 Version=1.0
 Type=Application
-Terminal=false
-Exec=python3 __main__.py
+Encoding=UTF-8
 Name=TinyChat
+Terminal=false
+Exec=lxterminal -e "python3 __main__.py"
 Icon=icon.ico
