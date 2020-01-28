@@ -1,8 +1,16 @@
+<p align="center">
+    <img width="35" src="icon.ico">
+</p>
+
+<p align="center">
+    <img width="350" src="readme.png">
+</p>
+
 # 💬 TinyChat
 
-[![version](https://img.shields.io/badge/version-v0.1.0-red.svg)](https://github.com/MartinKondor/TinyChat) [![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/MartinKondor/TinyChat) ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg) [![GitHub Issues](https://img.shields.io/github/issues/MartinKondor/TinyChat.svg)](https://github.com/MartinKondor/TinyChat/issues)
+[![version](https://img.shields.io/badge/version-v0.9.0-red.svg)](https://github.com/MartinKondor/TinyChat) [![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/MartinKondor/TinyChat) ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg) [![GitHub Issues](https://img.shields.io/github/issues/MartinKondor/TinyChat.svg)](https://github.com/MartinKondor/TinyChat/issues)
 
-TinyChat for two person chatting trought Raspberry Pi.
+Chatting through ethernet with two Raspberry Pis.
 
 ## Getting Started
 
@@ -10,6 +18,17 @@ TinyChat for two person chatting trought Raspberry Pi.
 
 * Python 3.X
 * Raspbian OS
+
+### Steps
+
+1. Run the desktop file on your Raspberry Pi.
+    * If it doesn't work, start the program from the command line with:
+        `$ python3 .`
+        in TinyChat's directory.
+2. Set your name and the partner's IP address.
+    * You can check it by using: `$ ifconfig eth0`
+3. Set the server option to Yes or No.
+    * **The server must be the first Raspberry to start the TinyChat program.**
 
 ## Contributing
 
@@ -31,11 +50,17 @@ Ways to contribute:
 
 * **[Martin Kondor](https://github.com/MartinKondor)**
 
+<p align="center">
+<a title="Fiverr" href="https://www.fiverr.com/martinkondor">
+<img id="fiverr-img" class="img-responsive" alt="Hire me on fiverr!" title="Hire me on fiverr!" src="https://martinkondor.github.io/img/hire_me_on_fiverr_button.png" width="222">
+</a>
+</p>
+
 <p align="center"><a href="https://www.patreon.com/bePatron?u=17006186" data-patreon-widget-type="become-patron-button"><img width="222" class="img-responsive" alt="Become a Patron!" title="Become a Patron!" src="https://martinkondor.github.io/img/become_a_patron_button.png"></a></p>
 
 ## License
 
-Copyright &copy; Martin Kondor 2019 - 2020
+Copyright &copy; Martin Kondor 2020
 
 This repository is licensed under the ```BSD 3-Clause``` license.
 See the [LICENSE](./LICENSE) file for more details.
