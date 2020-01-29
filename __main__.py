@@ -8,7 +8,6 @@ from tkinter import Tk, Menu, Listbox, Label, Scrollbar, Entry, StringVar, SINGL
 from tkinter.ttk import Button, Style
 from tkinter.messagebox import showinfo, showerror, askquestion
 from tkinter.filedialog import askopenfilename, asksaveasfilename
-from RPi import GPIO
 
 from eth import ETHConnection
 
@@ -21,7 +20,7 @@ IS_SERVER = False
 class SetupWindow(Tk):
     """
     Little GUI for setting user's name, the partner's ip and that
-    the RPi is a server or not.
+    the PC is a server or not.
     """
 
     def __init__(self, *args, **kwargs):
@@ -128,6 +127,7 @@ class TinyChat(Tk):
         
         # Connect on the ethernet port
         self.ETH = ETHConnection(OTHER_IP, IS_SERVER)
+
         self.msg_recv_thread = Thread(target=self.recv_msg)
         self.msg_recv_thread.start()
 
@@ -140,7 +140,7 @@ class TinyChat(Tk):
         self.mainloop()
 
     def send_msg(self):
-        global MY_NAME, OTHER_IP
+        global MY_NAME, OTHER_IP, IS_SERVER
         msg_to_send = self.entry_box.get()
         self.entry_box.delete(0, END)
         
@@ -188,6 +188,9 @@ class TinyChat(Tk):
 
     def recv_msg(self):
         while True:
+            if not self.ETH:
+                continue
+
             data = self.ETH.recv(1024)
             if data:
                 self.add_msg(data)
@@ -198,14 +201,13 @@ class TinyChat(Tk):
 
     def notifications(self):
         if self.new_notification:
-            GPIO.output(21, GPIO.HIGH)
-            time.sleep(0.25)
-            GPIO.output(21, GPIO.LOW)
-            time.sleep(0.25)
+            pass
 
     def on_closing(self):
-        self.ETH.send(MY_NAME + ' has left the chat.')
-        self.ETH.close()
+        if self.ETH:
+            self.ETH.send(MY_NAME + ' has left the chat.')
+            self.ETH.close()
+
         self.destroy()
 
     def keypress(self, event):
@@ -220,11 +222,7 @@ class TinyChat(Tk):
 
 
 if __name__ == '__main__':
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-    GPIO.setup(21, GPIO.OUT)
-    GPIO.output(21, GPIO.HIGH)
-
     SetupWindow()
+
     if MY_NAME:
         TinyChat()

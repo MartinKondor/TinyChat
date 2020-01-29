@@ -33,6 +33,7 @@ class ETHConnection:
                 self.ETH = SOCKET
         except Exception as e:
             print('Error when connecting:', str(e))
+            self.ETH = None
 
     def reconnect(self):
         self.close()
@@ -47,9 +48,11 @@ class ETHConnection:
     def _eth_decode(self, s):
         return s.decode('utf-8')
 
-
     def _eth_encode(self, s):
         return bytearray(str(s).encode('utf-8'))
+
+    def __bool__(self):
+        return self.ETH is not None
             
 
 if __name__ == '__main__':

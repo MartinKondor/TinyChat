@@ -3,32 +3,28 @@
 </p>
 
 <p align="center">
-    <img width="350" src="readme.png">
+    <img width="350" src="docs/img/readme.png">
 </p>
 
 # 💬 TinyChat
 
-[![version](https://img.shields.io/badge/version-v0.9.0-red.svg)](https://github.com/MartinKondor/TinyChat) [![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/MartinKondor/TinyChat) ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg) [![GitHub Issues](https://img.shields.io/github/issues/MartinKondor/TinyChat.svg)](https://github.com/MartinKondor/TinyChat/issues)
+[![version](https://img.shields.io/badge/version-v0.9.1-red.svg)](https://github.com/MartinKondor/TinyChat) [![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/MartinKondor/TinyChat) ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg) [![GitHub Issues](https://img.shields.io/github/issues/MartinKondor/TinyChat.svg)](https://github.com/MartinKondor/TinyChat/issues)
 
-Chatting through ethernet with two Raspberry Pis.
+Chat program.
 
 ## Getting Started
 
 ### Prerequisites
 
 * Python 3.X
-* Raspbian OS
 
 ### Steps
 
-1. Run the desktop file on your Raspberry Pi.
-    * If it doesn't work, start the program from the command line with:
-        `$ python3 .`
-        in TinyChat's directory.
+1. Start the program from the command line with `$ python3 .` in TinyChat's directory.
 2. Set your name and the partner's IP address.
-    * You can check it by using: `$ ifconfig eth0`
+    * You can check your IP by using `$ ifconfig eth0 || ipconfig`
 3. Set the server option to Yes or No.
-    * **The server must be the first Raspberry to start the TinyChat program.**
+    * **The server must be the first to start the TinyChat program.**
 
 ## Contributing
 
