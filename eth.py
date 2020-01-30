@@ -8,6 +8,7 @@ class ETHConnection:
         self.OTHER_IP = other_ip
         self.ETH = None
         self.PORT = port
+        self.is_connected = False
         self.connect()
 
     def send(self, s):
@@ -31,9 +32,12 @@ class ETHConnection:
             else:
                 SOCKET.connect((self.OTHER_IP, self.PORT,))
                 self.ETH = SOCKET
+
+            self.is_connected = True
         except Exception as e:
             print('Error when connecting:', str(e))
             self.ETH = None
+            self.is_connected = False
 
     def reconnect(self):
         self.close()

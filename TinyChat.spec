@@ -1,16 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
-# pyinstaller --noconsole __main__.py
+# pyinstaller --noconsole TinyChat.py
 
 block_cipher = None
 
 
-a = Analysis(['__main__.py'],
+a = Analysis(['TinyChat.py'],
              pathex=['C:\\Users\\kondorm\\Desktop\\TinyChat'],
              binaries=[],
              datas=[
                  ('README.md', '.'),
                  ('icon.ico', '.'),
-                 ('LICENSE', '.')
+                 ('LICENSE', '.'),
+                 ('audio', './audio')
              ],
              hiddenimports=[],
              hookspath=[],
@@ -41,4 +42,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='__main__')
+               name='TinyChat')

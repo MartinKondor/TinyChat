@@ -1,13 +1,15 @@
-# 1.2
 import os
+import sys
 import time
 import json
 import socket
-from threading import Thread
+import threading
 from tkinter import Tk, Menu, Listbox, Label, Scrollbar, Entry, StringVar, SINGLE, END, CENTER, ACTIVE, LEFT, N, S, E, W
 from tkinter.ttk import Button, Style
 from tkinter.messagebox import showinfo, showerror, askquestion
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+
+from playsound import playsound
 
 from eth import ETHConnection
 
@@ -15,6 +17,14 @@ from eth import ETHConnection
 MY_NAME = ''
 OTHER_IP = ''
 IS_SERVER = False
+
+
+def threaded(fn):
+    def wrapper(*args, **kwargs):
+        thread = threading.Thread(target=fn, args=args, kwargs=kwargs)
+        thread.start()
+        return thread
+    return wrapper
 
 
 class SetupWindow(Tk):
@@ -109,6 +119,8 @@ class TinyChat(Tk):
         self.eval('tk::PlaceWindow %s center' % self.winfo_pathname(self.winfo_id()))
         self.bind('<Key>', self.keypress)
 
+        self.__exited = False
+        self.sound_played_for_notification = False
         self.new_notification = False
         self.line_width = 42
 
@@ -128,11 +140,12 @@ class TinyChat(Tk):
         # Connect on the ethernet port
         self.ETH = ETHConnection(OTHER_IP, IS_SERVER)
 
-        self.msg_recv_thread = Thread(target=self.recv_msg)
-        self.msg_recv_thread.start()
-
-        self.notifications_thread = Thread(target=self.notifications)
-        self.notifications_thread.start()
+        # self.msg_recv_thread = Thread(target=self.recv_msg)
+        # self.msg_recv_thread.start()
+        # self.notifications_thread = Thread(target=self.notifications)
+        # self.notifications_thread.start()
+        self.msg_recv_thread = self.recv_msg()
+        self.notifications_thread = self.notifications()
 
         self.wm_attributes('-topmost', 1)
         self.bind('<FocusIn>', self.handle_focus)
@@ -170,11 +183,11 @@ class TinyChat(Tk):
             try:
                 self.ETH.send(msg_to_send)
             except:
-                self.msg_list.insert(END, 'There is noone on the other end  ¯\_(ツ)_/¯.')
+                self.msg_list.insert(END, 'There is noone on the other end  ¯\\_(ツ)_/¯.')
                 
                 # Try to reestabilish connection
                 self.ETH.reconnect()
-                self.msg_recv_thread = Thread(target=self.recv_msg)
+                self.msg_recv_thread = self.recv_msg()
                 self.msg_recv_thread.start()
 
     def add_msg(self, msg):
@@ -186,8 +199,11 @@ class TinyChat(Tk):
         
         self.msg_list.yview_moveto('1')  # Scroll down to the last message
 
+    @threaded
     def recv_msg(self):
-        while True:
+        while not self.__exited:
+            time.sleep(0.1)
+
             if not self.ETH:
                 continue
 
@@ -195,19 +211,30 @@ class TinyChat(Tk):
             if data:
                 self.add_msg(data)
                 self.new_notification = True
+                self.sound_played_for_notification = False
 
     def handle_focus(self, e):
         self.new_notification = False
 
+    @threaded
     def notifications(self):
-        if self.new_notification:
-            pass
+        while not self.__exited:
+            time.sleep(0.1)
+
+            if self.new_notification:
+                if not self.sound_played_for_notification:
+                    playsound('audio/notification.wav')
+                    self.sound_played_for_notification = True
 
     def on_closing(self):
-        if self.ETH:
+        """
+        if self.ETH.is_connected:
             self.ETH.send(MY_NAME + ' has left the chat.')
             self.ETH.close()
-
+        """
+        self.__exited = True
+        self.notifications_thread.join()
+        self.msg_recv_thread.join()
         self.destroy()
 
     def keypress(self, event):
