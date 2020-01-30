@@ -17,6 +17,7 @@ from eth import ETHConnection
 MY_NAME = ''
 OTHER_IP = ''
 IS_SERVER = False
+EXITED = False
 
 
 def threaded(fn):
@@ -119,7 +120,6 @@ class TinyChat(Tk):
         self.eval('tk::PlaceWindow %s center' % self.winfo_pathname(self.winfo_id()))
         self.bind('<Key>', self.keypress)
 
-        self.__exited = False
         self.sound_played_for_notification = False
         self.new_notification = False
         self.line_width = 42
@@ -199,9 +199,13 @@ class TinyChat(Tk):
         
         self.msg_list.yview_moveto('1')  # Scroll down to the last message
 
+    def handle_focus(self, e):
+        self.new_notification = False
+
     @threaded
     def recv_msg(self):
-        while not self.__exited:
+        global EXITED
+        while not EXITED:
             time.sleep(0.1)
 
             if not self.ETH:
@@ -213,12 +217,10 @@ class TinyChat(Tk):
                 self.new_notification = True
                 self.sound_played_for_notification = False
 
-    def handle_focus(self, e):
-        self.new_notification = False
-
     @threaded
     def notifications(self):
-        while not self.__exited:
+        global EXITED
+        while not EXITED:
             time.sleep(0.1)
 
             if self.new_notification:
@@ -232,7 +234,8 @@ class TinyChat(Tk):
             self.ETH.send(MY_NAME + ' has left the chat.')
             self.ETH.close()
         """
-        self.__exited = True
+        global EXITED
+        EXITED = True
         self.notifications_thread.join()
         self.msg_recv_thread.join()
         self.destroy()
