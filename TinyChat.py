@@ -4,7 +4,7 @@ import time
 import json
 import socket
 import threading
-from tkinter import Tk, Menu, Listbox, Label, Scrollbar, Entry, StringVar, SINGLE, END, CENTER, ACTIVE, LEFT, N, S, E, W
+from tkinter import Tk, Menu, Listbox, Label, Scrollbar, Entry, StringVar, SINGLE, END, CENTER, ACTIVE, LEFT, N, S, E, W, TclError
 from tkinter.ttk import Button, Style
 from tkinter.messagebox import showinfo, showerror, askquestion
 from tkinter.filedialog import askopenfilename, asksaveasfilename
@@ -44,7 +44,10 @@ class SetupWindow(Tk):
 
         self.wm_title('TinyChat')
         self.resizable(False, False)
-        self.eval('tk::PlaceWindow %s center' % self.winfo_pathname(self.winfo_id()))
+        try:
+            self.eval('tk::PlaceWindow %s center' % self.winfo_pathname(self.winfo_id()))
+        except TclError:
+            pass
 
         self.name = 'anonymous'
         self.other_ip = socket.gethostbyname(socket.gethostname())
@@ -117,7 +120,12 @@ class TinyChat(Tk):
 
         self.wm_title('TinyChat')
         self.resizable(False, False)
-        self.eval('tk::PlaceWindow %s center' % self.winfo_pathname(self.winfo_id()))
+        
+        try:
+            self.eval('tk::PlaceWindow %s center' % self.winfo_pathname(self.winfo_id()))
+        except TclError:
+            pass
+
         self.bind('<Key>', self.keypress)
 
         self.sound_played_for_notification = False

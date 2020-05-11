@@ -26,6 +26,12 @@ Chat program.
 3. Set the server option to Yes or No.
     * **A server and a NOT server is necessary for working connection.**
 
+### In chat commands
+
+* To rename yourself during chat conversation, type in: `/setname <NEW NAME>`
+* To reconnect, type in: `/re`
+* To set the partner's IP address, type in: `/ip <IP>`
+
 ## Contributing
 
 Ways to contribute:
