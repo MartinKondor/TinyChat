@@ -24,7 +24,7 @@ Chat program.
 2. Set your name and the partner's IP address.
     * You can check your IP by using `$ ifconfig eth0 || ipconfig`
 3. Set the server option to Yes or No.
-    * **The server must be the first to start the TinyChat program.**
+    * **A server and a NOT server is necessary for working connection.**
 
 ## Contributing
 
