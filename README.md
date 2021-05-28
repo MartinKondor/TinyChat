@@ -50,19 +50,12 @@ Ways to contribute:
 
 ## Authors
 
-* **[Martin Kondor](https://github.com/MartinKondor)**
-
-<p align="center">
-<a title="Fiverr" href="https://www.fiverr.com/martinkondor">
-<img id="fiverr-img" class="img-responsive" alt="Hire me on fiverr!" title="Hire me on fiverr!" src="https://martinkondor.github.io/img/hire_me_on_fiverr_button.png" width="222">
-</a>
-</p>
-
-<p align="center"><a href="https://www.patreon.com/bePatron?u=17006186" data-patreon-widget-type="become-patron-button"><img width="222" class="img-responsive" alt="Become a Patron!" title="Become a Patron!" src="https://martinkondor.github.io/img/become_a_patron_button.png"></a></p>
+* **[MartinKondor](https://github.com/MartinKondor)**
+* **[szmol96](https://github.com/szmol96)**
 
 ## License
 
-Copyright &copy; Martin Kondor 2020
+Copyright &copy; Martin Kondor 2021
 
 This repository is licensed under the ```BSD 3-Clause``` license.
 See the [LICENSE](./LICENSE) file for more details.
